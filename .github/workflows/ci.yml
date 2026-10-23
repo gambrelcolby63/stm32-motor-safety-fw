@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  host:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc g++ python3 cppcheck
+      - name: Configure
+        run: cmake -S . -B build/host -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+      - name: Build
+        run: cmake --build build/host
+      - name: Test
+        run: ctest --test-dir build/host --output-on-failure
+      - name: cppcheck
+        run: sh tools/cppcheck.sh
+
+  firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cross toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi python3
+      - name: Configure
+        run: cmake -S . -B build/fw -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+      - name: Build
+        run: cmake --build build/fw
+      - name: Size budget
+        run: python3 tools/size_budget.py build/fw/gimbal.elf
+
+  renode:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cross toolchain and Renode
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi python3 python3-pip curl
+          sh tools/install_renode.sh /opt/renode
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Configure
+        run: cmake -S . -B build/fw -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-arm-none-eabi.cmake
+      - name: Build
+        run: cmake --build build/fw
+      - name: Renode tests
+        run: renode-test tests/renode/gimbal.robot

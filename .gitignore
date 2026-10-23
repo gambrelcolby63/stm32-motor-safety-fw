@@ -1,0 +1,13 @@
+build/
+logs/
+snapshots/
+robot_output.xml
+log.html
+report.html
+output.xml
+*.elf
+*.map
+*.o
+*.obj
+*.d
+.cache/

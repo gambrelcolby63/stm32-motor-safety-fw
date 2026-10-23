@@ -1,0 +1,42 @@
+using "platforms/cpus/stm32f4.repl"
+
+/* Firmware runs from the 16 MHz HSI, so the SysTick clock and USART baud clock match. */
+nvic:
+    systickFrequency: 16000000
+
+usart2:
+    frequency: 16000000
+
+/* Active-high inputs. A released button drives the net low. */
+estopButton: Miscellaneous.Button @ gpioPortC
+    -> gpioPortC@0
+
+panIndexButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@0
+
+panHomeButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@1
+
+panLimitMinButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@2
+
+panLimitMaxButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@3
+
+tiltIndexButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@8
+
+tiltHomeButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@9
+
+tiltLimitMinButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@10
+
+tiltLimitMaxButton: Miscellaneous.Button @ gpioPortB
+    -> gpioPortB@11
+
+panDriverFault: Miscellaneous.Button @ gpioPortD
+    -> gpioPortD@0
+
+tiltDriverFault: Miscellaneous.Button @ gpioPortD
+    -> gpioPortD@1
